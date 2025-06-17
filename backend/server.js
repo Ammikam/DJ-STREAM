@@ -13,7 +13,7 @@ app.use(cors({ origin: "*" }));
 
 app.post("/generate-token", (req, res) => {
   const { userId, role } = req.body;
-  const callId = "livestream_772e30a7-d0e8-4c11-a85f-f25ef256b3c0";
+  const callId = "livestream_a6d9e2db-16c7-4665-abf2-47ff6f3f1393";
   console.log("Received request:", { userId, role, callId });
   if (!userId || !role) {
     return res.status(400).json({ error: "userId and role are required" });

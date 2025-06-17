@@ -105,7 +105,11 @@ export default function AuthPage() {
 
   const handleAuth = async () => {
     try {
-      isLogin ? login() : register();
+      if (isLogin) {
+        await login();
+      } else {
+        await register();
+      }
       navigate("/stream");
     } catch (err: any) {
       alert(err.message);

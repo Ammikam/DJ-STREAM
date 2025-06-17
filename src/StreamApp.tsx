@@ -16,7 +16,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 
 const apiKey = "cynaurb9zvhy";
-const callId = "livestream_772e30a7-d0e8-4c11-a85f-f25ef256b3c0";
+const callId = "livestream_a6d9e2db-16c7-4665-abf2-47ff6f3f1393";
 
 // Define types
 type Role = "viewer" | "broadcaster";
