@@ -26,7 +26,7 @@ export default function App() {
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <Routes>
-        <Route path="/Authpage" element={<AuthPage user={user} />} />
+        <Route path="/Authpage" element={<AuthPage />} />
         <Route path="/stream" element={<StreamApp />} />
       </Routes>
     </UserContext.Provider>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { auth, db } from "../config/firebase";
 import {
   createUserWithEmailAndPassword,
@@ -6,22 +6,48 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { generateToken } from "./auth/token";
-import { Navigate, NavLink, useNavigate } from "react-router-dom";
-import type { User } from "./App";
+import { NavLink, useNavigate } from "react-router-dom";
 import useUser from "./hooks/useUser";
 
-interface AuthPageProps {
-  user: User | null;
-}
-
-export default function AuthPage({ user }: AuthPageProps) {
-  const { setUser } = useUser();
+export default function AuthPage() {
+  const { setUser, user } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState(""); // Used as userId
   const [role, setRole] = useState("viewer");
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate(); // Assuming you have a custom hook for navigation
+
+  useEffect(() => {
+    const regenerateToken = async () => {
+      if (user && !user.token) {
+        const { token } = await generateToken(user.id, user.role);
+        setUser({ ...user, token });
+
+        // Save the token under the correct role
+        const userRef = doc(db, "users", user.id);
+        const userSnap = await getDoc(userRef);
+        const existingData = userSnap.exists() ? userSnap.data() : {};
+
+        const updatedTokens = {
+          ...(existingData.tokens || {}),
+          [user.role]: token, // viewer or broadcaster
+        };
+
+        await setDoc(
+          userRef,
+          {
+            tokens: updatedTokens,
+            role: user.role, // default viewer
+            updatedAt: new Date(),
+          },
+          { merge: true }
+        );
+      }
+    };
+
+    regenerateToken();
+  }, [user]);
 
   const register = async () => {
     const userCredential = await createUserWithEmailAndPassword(
