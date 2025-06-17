@@ -26,7 +26,6 @@ app.post("/generate-token", (req, res) => {
         call_cids: [`livestream:${callId}`],
         iss: "@stream-io/dashboard",
         iat: Math.round(Date.now() / 1000),
-        exp: Math.round(Date.now() / 1000) + 60 * 60, // 1-hour expiration
       },
       secret,
       { algorithm: "HS256" }
