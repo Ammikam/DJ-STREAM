@@ -7,6 +7,8 @@ import {
   CallControls,
   LivestreamPlayer,
 } from "@stream-io/video-react-sdk";
+import { useCallStateHooks } from "@stream-io/video-react-sdk";
+import { Backstage } from "./hooks/backstage";
 import { auth } from "../config/firebase";
 import { signOut } from "firebase/auth";
 import { Navigate } from "react-router-dom";
@@ -23,8 +25,8 @@ type Role = "viewer" | "broadcaster";
 
 interface TokenStore {
   [key: string]: string;
-  viewer?: string;
-  broadcaster?: string;
+  viewer: string;
+  broadcaster: string;
 }
 
 interface UserDoc {
@@ -35,15 +37,24 @@ interface UserDoc {
 
 const StreamApp = () => {
   const [client, setClient] = useState<StreamVideoClient | null>(null);
-  const [call, setCall] = useState<any>(null);
+  const [call, setCall] = useState<StreamCall | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { useCallEndedAt, useIsCallLive } = useCallStateHooks();
+  const endedAt = useCallEndedAt();
+  const isLive = useIsCallLive();
   const [role, setRole] = useState<Role>(
     (localStorage.getItem("role") as Role) || "viewer"
   );
   const { user } = useUser();
 
   const isBroadcaster = role === "broadcaster";
+
+  // const LivestreamContent = () => {
+  //   const { useCallEndedAt, useIsCallLive } = useCallStateHooks();
+  //   const endedAt = useCallEndedAt();
+  //   const isLive = useIsCallLive();
+  // };
 
   useEffect(() => {
     const setup = async () => {
@@ -135,10 +146,10 @@ const StreamApp = () => {
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
 
-      let tokens: TokenStore = {};
+      let tokens: TokenStore = { viewer: "", broadcaster: "" };
       if (userSnap.exists()) {
         const userData = userSnap.data() as UserDoc;
-        tokens = userData.tokens || {};
+        tokens = userData.tokens || { viewer: "", broadcaster: "" };
       }
 
       // If token for the new role doesn't exist, generate and save it
@@ -291,6 +302,13 @@ const StreamApp = () => {
           </button>
         </StreamVideo>
       )}
+
+      <>
+  
+      {!isLive && <Backstage />}
+      {endedAt != null && <CallEnded />}
+      {endedAt == null && <CallLiveContent />}
+      </>
 
       <button
         onClick={handleSignOut}
